@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.bank.database.DBConnnection;
+import com.bank.database.DBConnection;
 
 @Controller
 public class LoginController {
@@ -28,7 +28,7 @@ public class LoginController {
 //		return "home";		// temporary page (we will create ./it later)
 		
 		try {
-			Connection conn = DBConnnection.getConnection();
+			Connection conn = DBConnection.getConnection();
 			Statement st = conn.createStatement();
 			String query = "SELECT * FROM login WHERE cardNo = '" + cardNo + "' AND pin = '" + pin + "'";
 			

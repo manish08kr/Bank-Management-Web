@@ -3,7 +3,7 @@ package com.bank.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class DBConnnection {
+public class DBConnection {
 
 	private static Connection conn;
 
