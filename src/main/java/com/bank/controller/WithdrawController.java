@@ -50,7 +50,7 @@ public class WithdrawController {
 					balance -= Integer.parseInt(rs2.getString("amount"));
 				}
 			}
-			
+		
 			int withdrawAmount = Integer.parseInt(amount);
 			
 			// Insufficient balance check
