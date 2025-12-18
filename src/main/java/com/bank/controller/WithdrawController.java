@@ -44,11 +44,21 @@ public class WithdrawController {
 			
 			int balance = 0;
 			while(rs2.next()) {
-				if(rs2.getString("type").equals("Deposit")) {
-					balance += Integer.parseInt(rs2.getString("amount"));
-				} else {
-					balance -= Integer.parseInt(rs2.getString("amount"));
-				}
+                String type = rs2.getString("type");
+                String amtStr = rs2.getString("amount");
+
+                // --> Null check
+                if (amtStr == null || amtStr.trim().isEmpty()) {
+                    continue;
+                }
+
+                int amt = Integer.parseInt(amtStr);
+
+                if (type.equalsIgnoreCase("Deposit")) {
+                    balance += amt;
+                } else {
+                    balance -= amt;
+                }
 			}
 		
 			int withdrawAmount = Integer.parseInt(amount);

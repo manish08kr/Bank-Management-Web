@@ -1,8 +1,8 @@
 package com.bank.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,25 +24,28 @@ public class DepositController {
 	public String depositAmount(@RequestParam String amount, @RequestParam String pin, Model model) {
 		try {
 			Connection con = DBConnection.getConnection();
-			Statement st = con.createStatement();
 			
-            // Check if PIN exists in login table
-			String pinCheck = "SELECT * FROM login WHERE pin = '" + pin + "'";
+			// 1. Validate PIN
+			String pinQuery = "SELECT cardNo FROM login WHERE pin = ?";		
 			
-			ResultSet rs = st.executeQuery(pinCheck);
+			PreparedStatement pst1 = con.prepareStatement(pinQuery);
+			pst1.setString(1, pin);
+			ResultSet rs = pst1.executeQuery();
 			
 			if(!rs.next()) {
-				model.addAttribute("error", "Invalid PIN");
+				model.addAttribute("error", "Invalid PIN!");
 				return "deposit";
 			}
 			
-			String cardNo = rs.getString("cardNo");
+			String cardno = rs.getString("cardNo");
 			
-            // Insert deposit transaction
-			String q1 = "INSERT INTO bank(cardNo, date, type, amount)"+ 
-						"VALUES('" + cardNo + "', NOW(), 'Deposit', '" + amount+ "')";
+            // 2. Insert deposit transaction
+			String insertQuery = "INSERT INTO bank(cardNo, date, type, amount) VALUES(?, NOW(), 'Deposit', ?)";
+			PreparedStatement pst2 = con.prepareStatement(insertQuery);
+			pst2.setString(1, cardno);
+			pst2.setString(2, amount);
 			
-			st.executeUpdate(q1);
+			pst2.executeUpdate();
 			
 			model.addAttribute("success", "Amount Deposited Successfully!");
 		} catch(Exception e) {

@@ -9,8 +9,12 @@
 <body>
 
 	<h2>Fast Cash</h2>
-	<form action="/fastCash">
+	<form action="/fastCash" method="post">
 		<label>Enter PIN : </label>
+		<input type="password" name="pin" required><br><br>
+		
+		<p>Select Amount : </p>
+		
 		<button type="submit" name="maount" value="100">Rs 100</button>
 		<button type="submit" name="maount" value="500">Rs 500</button>
 		<button type="submit" name="maount" value="1000">Rs 1000</button>

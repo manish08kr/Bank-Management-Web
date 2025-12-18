@@ -1,6 +1,9 @@
 package com.bank.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,18 +11,21 @@ import java.sql.ResultSet;
 
 import com.bank.database.DBConnection;
 
+@Controller
 public class FastCashController {
 
+	@GetMapping("/fastCash")
 	public String showFastCashPage() {
 		return "fastCash";
 	}
 
+	@PostMapping("/fastCash")
 	public String fastCashWithdraw(String amount, String pin, Model model) {
 		try {
 			Connection con = DBConnection.getConnection();
 
 			// validate PIN
-			String pinQuery = "SELECT FROM login where pin = ?";
+			String pinQuery = "SELECT * FROM login where pin = ?";
 
 			PreparedStatement pst1 = con.prepareStatement(pinQuery);
 			pst1.setString(1, pin);
@@ -30,21 +36,31 @@ public class FastCashController {
 				return "fastCash";
 			}
 
-			String cardNo = rs.getString("cardNo");
+			String cardno = rs.getString("cardNo");
 
 			// Calculate current balance
 			String balQuery = "SELECT type, amount FROM bank WHERE cardNo =?";
-			PreparedStatement pst2 = con.prepareStatement(pinQuery);
-			pst2.setString(1, cardNo);
+			PreparedStatement pst2 = con.prepareStatement(balQuery);
+			pst2.setString(1, cardno);
 
 			ResultSet rs2 = pst2.executeQuery();
 
 			int balance = 0;
 			while (rs2.next()) {
-				if (rs2.getString("type").equals("Deposit")) {
-					balance += Integer.parseInt(rs2.getString("amount"));
+				String type = rs2.getString("type");
+				String amtStr = rs2.getString("amount");
+
+				// --->  NULL / EMPTY CHECK (prevents NumberFormatException)
+				if (amtStr == null || amtStr.trim().isEmpty()) {
+					continue; // skip this broken row
+				}
+
+				int amt = Integer.parseInt(amtStr);
+
+				if (type.equalsIgnoreCase("Deposit")) {
+					balance += amt;
 				} else {
-					balance -= Integer.parseInt(rs2.getString("amount"));
+					balance -= amt;
 				}
 			}
 
@@ -57,11 +73,12 @@ public class FastCashController {
 			}
 
 			// Insert withdrawal as Fast Cash
-			String insertQuery = "INSERT INTO bank(cardno, date, type, amount) VALUES(?, NOW(), 'FastCash', ?)";
+			String insertQuery = "INSERT INTO bank(cardNo, date, type, amount) VALUES(?, NOW(), ?, ?)";
 
 			PreparedStatement pst3 = con.prepareStatement(insertQuery);
-			pst3.setString(1, cardNo);
-			pst3.setString(2, amount);
+			pst3.setString(1, cardno);
+			pst3.setString(2, "Deposit");
+			pst3.setString(3, amount);
 
 			pst3.executeUpdate();
 
@@ -72,6 +89,6 @@ public class FastCashController {
 			model.addAttribute("error", "Database Error!");
 		}
 
-		return "fastcash";
+		return "fastCash";
 	}
 }
