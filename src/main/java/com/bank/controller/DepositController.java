@@ -12,11 +12,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.bank.database.DBConnection;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class DepositController {
 	
 	@GetMapping("/deposit")
-	public String showDepositPage() {
+	public String showDepositPage(HttpSession session) {
+		if(session.getAttribute("cardNo") == null) {
+			return "redirect:/login";
+		}
 		return "deposit";
 	}
 	

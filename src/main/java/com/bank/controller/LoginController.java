@@ -1,8 +1,8 @@
 package com.bank.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.bank.database.DBConnection;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class LoginController {
@@ -21,7 +23,7 @@ public class LoginController {
 	}
 	
 	@PostMapping("/login")
-	public String loginUser(@RequestParam String cardNo, @RequestParam String pin, Model model) {
+	public String loginUser(@RequestParam String cardno, @RequestParam String pin, HttpSession session, Model model) {
 //		-->	will connect database here
 //		System.out.println("User entered: " + cardNo + " and PIN: " + pin);
 //		
@@ -29,13 +31,19 @@ public class LoginController {
 		
 		try {
 			Connection conn = DBConnection.getConnection();
-			Statement st = conn.createStatement();
-			String query = "SELECT * FROM login WHERE cardNo = '" + cardNo + "' AND pin = '" + pin + "'";
+						
+			String query = "SELECT * FROM login WHERE cardNo = ? AND pin = ?";
 			
-			ResultSet rs = st.executeQuery(query);
+			PreparedStatement pst = conn.prepareStatement(query);
+			pst.setString(1, cardno);
+			pst.setString(2, pin);
+			
+			ResultSet rs = pst.executeQuery(query);
 
 			if(rs.next()) {
-				return "home";
+				// store cardno in session
+				session.setAttribute("cardNo", cardno);
+				return "dashboard";			// go to Main Menu
 			}else {
 				model.addAttribute("error", "Invalid Card Number or PIN!");
 				return "login";

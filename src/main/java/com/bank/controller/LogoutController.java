@@ -1,0 +1,16 @@
+package com.bank.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+public class LogoutController {
+
+	@GetMapping("/balance")
+	public String logout(HttpSession session) {
+		session.invalidate();		// clear session
+		return "redirect:/login";
+	}
+}
