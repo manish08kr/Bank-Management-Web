@@ -10,7 +10,7 @@
 
 	<h2>Application Form - Step1</h2>
 
-	<form action="signup-step1" method="post">
+	<form action="/signup-step1" method="post">
 	
 		<label>Name : </label>
 		<input type ="text" name = "name" required><br><br>
