@@ -2,61 +2,64 @@ package com.bank.controller;
 
 
 import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bank.database.DBConnection;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class SignupController {
 	
 	@GetMapping("/signup")
-	public String showsignupPage() {
-		return "signup";
+	public String showSignupPage() {
+		return "signup";				// signup.jsp
 	}
 	
 	@PostMapping("/signup-step1")
-	public String saveStep1(
+	public String signupStep1(
 			@RequestParam String name,
 			@RequestParam String fname,
 			@RequestParam String dob,
 			@RequestParam String gender,
 			@RequestParam String email,
 			@RequestParam String marital,
-			Model model	
+			HttpSession session	
 			) {
         // Store data temporarily (session)
-		model.addAttribute("name", name);
-		model.addAttribute("fname", fname);
-		model.addAttribute("dob", dob);
-		model.addAttribute("gender", gender);
-		model.addAttribute("email", email);
-		model.addAttribute("marital", marital);
+		session.setAttribute("name", name);
+		session.setAttribute("fname", fname);
+		session.setAttribute("dob", dob);
+		session.setAttribute("gender", gender);
+		session.setAttribute("email", email);
+		session.setAttribute("marital", marital);
 		
-        // Move to next signup page (Step 2)
+        // Move to Next page → signup step-2
 		return "signup2";
 	}
 	
 	@PostMapping("/signup-step2")
-	public String saveStep2(
+	public String signupStep2(
 			@RequestParam String address,
 			@RequestParam String city,
 			@RequestParam String state,
 			@RequestParam String pincode,
-			Model model	
+			HttpSession session
 			) {
         // Store data temporarily (session)
-		model.addAttribute("address", address);
-		model.addAttribute("city", city);
-		model.addAttribute("state", state);
-		model.addAttribute("pincode", pincode);
+		session.setAttribute("address", address);
+		session.setAttribute("city", city);
+		session.setAttribute("state", state);
+		session.setAttribute("pincode", pincode);
 		
-        // Move to next signup page (Step 2)
+        // Move to Next page → signup step-3
 		return "signup3";
 	}
 	
@@ -64,7 +67,9 @@ public class SignupController {
 	public String completeSignup(
 			@RequestParam("account_type") String account_type,
 			@RequestParam(required = false) String[] services,
-			Model model
+			HttpSession session, 
+			Model model,
+			RedirectAttributes rd
 			) {
 		try {
 			//	Generate card number & PIN
@@ -75,29 +80,69 @@ public class SignupController {
 			int pin = 1000 + (int)(Math.random() * 9000);
 			
 	        // Join services into a comma-separated string
-			String serviceString = "";
-			if(services != null) {
-				serviceString = String.join(",", services);
-			}
+			String serviceString = (services != null) ? String.join(",", services) : "";
+
+			//	Get all previous Data from session
+			String name = (String)session.getAttribute("name");
+			String fname = (String)session.getAttribute("fname");
+			String dob = (String)session.getAttribute("dob");
+			String gender = (String)session.getAttribute("gender");
+			String email = (String)session.getAttribute("email");
+			String marital = (String)session.getAttribute("marital");
 			
+			String address = (String)session.getAttribute("address");
+			String city = (String)session.getAttribute("city");
+			String state = (String)session.getAttribute("state");
+			String pincode = (String)session.getAttribute("pincode");
+
 	        // Insert into database
 			Connection conn = DBConnection.getConnection();
-			Statement st = conn.createStatement();
+
+			String q1 = """
+					INSERT INTO signup3 (name, fname, dob, gender, email, marital, 
+					address, city, state, pincode, account_type, services)
+					VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+					""";
+			PreparedStatement pst1 = conn.prepareStatement(q1);
 			
-			String query = "INSERT INTO signup3 (account_type, services, cardNo, pin) VALUES ('"
-	                + account_type + "', '" + serviceString + "', '" + cardNo + "', '" + pin + "')";
+			pst1.setString(1, name);
+			pst1.setString(2, fname);
+			pst1.setString(3, dob);
+			pst1.setString(4, gender);
+			pst1.setString(5, email);
+			pst1.setString(6, marital);
+			pst1.setString(7, address);
+			pst1.setString(8, city);
+			pst1.setString(9, state);
+			pst1.setString(10, pincode);
+			pst1.setString(11, account_type);
+			pst1.setString(12, serviceString);
 
-	        st.executeUpdate(query);
 
-	        // Show card number & pin to user
-	        model.addAttribute("cardNo", cardNo);
-	        model.addAttribute("pin", pin);
+	        pst1.executeUpdate();
+	        
+	        String q2 = "INSERT INTO login VALUES (?,?)";
+			PreparedStatement pst2 = conn.prepareStatement(q2);
+			
+			pst2.setString(1,  String.valueOf(cardNo));
+			pst2.setString(2,  String.valueOf(pin));
+			
+			pst2.executeUpdate();
+	
+			session.invalidate();
 
-	        return "signup-success";
+			//	Signup success message : 
+	        rd.addFlashAttribute("success", "Account created successfully! Please do Login 🙂 <br>" +
+			"Card No : " + cardNo + " | PIN : " + pin);
+
+			//	redirect to login
+	        return "redirect:/login";
 			
 		} catch(Exception e) {
 			e.printStackTrace();
-			model.addAttribute("error", "Database error during signup!");
+			
+			//	Signup Failed --> same page
+			model.addAttribute("error", "Signup Failed! Please try again");
 			return "signup3";
 		}
 	}

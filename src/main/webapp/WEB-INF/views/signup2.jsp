@@ -12,7 +12,7 @@
 
 	<form action="/signup-step2" method="post">
 	
-		<label>Name : </label>
+		<label>Address : </label>
 		<input type ="text" name = "address" required><br><br>
 		
 		<label>City :</label>
