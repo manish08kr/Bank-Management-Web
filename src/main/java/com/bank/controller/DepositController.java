@@ -2,7 +2,6 @@ package com.bank.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,49 +15,54 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class DepositController {
-	
+
 	@GetMapping("/deposit")
 	public String showDepositPage(HttpSession session) {
-		if(session.getAttribute("cardNo") == null) {
-			return "redirect:/login";
-		}
 		return "deposit";
 	}
-	
+
 	@PostMapping("/deposit")
-	public String depositAmount(@RequestParam String amount, @RequestParam String pin, Model model) {
-		try {
-			Connection con = DBConnection.getConnection();
-			
-			// 1. Validate PIN
-			String pinQuery = "SELECT cardNo FROM login WHERE pin = ?";		
-			
-			PreparedStatement pst1 = con.prepareStatement(pinQuery);
-			pst1.setString(1, pin);
-			ResultSet rs = pst1.executeQuery();
-			
-			if(!rs.next()) {
-				model.addAttribute("error", "Invalid PIN!");
-				return "deposit";
-			}
-			
-			String cardno = rs.getString("cardNo");
-			
-            // 2. Insert deposit transaction
-			String insertQuery = "INSERT INTO bank(cardNo, date, type, amount) VALUES(?, NOW(), 'Deposit', ?)";
-			PreparedStatement pst2 = con.prepareStatement(insertQuery);
-			pst2.setString(1, cardno);
-			pst2.setString(2, amount);
-			
-			pst2.executeUpdate();
-			
-			model.addAttribute("success", "Amount Deposited Successfully!");
-		} catch(Exception e) {
-			e.printStackTrace();
-			model.addAttribute("error", "Database Error!");
+	public String depositAmount(@RequestParam int amount, HttpSession session, Model model) {
+
+		// Get Card number from login table
+		String cardno = (String) session.getAttribute("cardNo");
+
+/***
+ *  model.addAttribute("error", "Invalid amount");
+				|
+				|	model Internally use request
+				↓
+	request.setAttribute("error", "Invalid amount");
+
+ */
+		if (cardno == null) {
+			model.addAttribute("error", "Session expired. Please login Again!");
+			return "login"; // go to the login.jsp
+		}
+
+		if (amount <= 0) {
+			model.addAttribute("error", "Invalid deposit amount");
+			return "deposit";
 		}
 		
+		try {
+			Connection con = DBConnection.getConnection();
+
+			// Insert deposit transaction
+			String query = "INSERT INTO bank (cardno, type, amount) VALUES (?,?,?)";
+
+			PreparedStatement pst = con.prepareStatement(query);
+			pst.setString(1, cardno);
+			pst.setString(2, "Credit");
+			pst.setInt(3, amount);
+
+			pst.executeUpdate();
+
+			model.addAttribute("success", "Amount Deposited Successfully!🙂");
+		} catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("error", "something went wrong!");
+		}
 		return "deposit";
 	}
-	
 }

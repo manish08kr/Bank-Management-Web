@@ -4,23 +4,26 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Deposit Money</title>
+	<title>Deposit Money</title>
 </head>
 <body>
+
+<h2>Deposit Money</h2>
 
 	<form action="/deposit" method="post">
 	
 		<label>Enter Amount : </label>
 		<input type ="number" name = "amount" required><br><br>
 
-		<label>Enter PIN : </label><br>
-		<input type ="password" name = "pin" required><br><br>
-
     	<button type="submit">Deposit</button>
 	</form>
 	
+	<!-- This is the older ways-->
+	<p style="color:red"><%= request.getAttribute("error")%></p>
+	
+	<!-- ${success} ==> EL (Expression Language) , For Spring mvc ==> Recommended -->
+	<p style="color:green">${success}</p> 
 	<p style="color:red">${error}</p>
-	<p style="color:green">${success}</p>
 
 </body>
 </html>

@@ -4,9 +4,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Withdraw Money</title>
+	<title>Withdraw Money</title>
 </head>
 <body>
+
+<h2>Withdraw Money</h2>
 
 	<form action="/withdraw" method="post">
 	
@@ -19,8 +21,8 @@
     	<button type="submit">Withdraw</button>
 	</form>
 	
-	<p style="color:red">${error}</p>
 	<p style="color:green">${success}</p>
+	<p style="color:green">${error}</p>
 
 </body>
 </html>
