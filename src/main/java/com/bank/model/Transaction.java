@@ -4,10 +4,9 @@ public class Transaction {
 
 	private String date;
 	private String type;
-	private String amount;
-	
-	public Transaction(String date, String type, String amount) {
-		super();
+	private int amount;
+		
+	public Transaction(String date, String type, int amount) {
 		this.date = date;
 		this.type = type;
 		this.amount = amount;
@@ -29,11 +28,11 @@ public class Transaction {
 		this.type = type;
 	}
 
-	public String getAmount() {
+	public int getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(int amount) {
 		this.amount = amount;
 	}
 

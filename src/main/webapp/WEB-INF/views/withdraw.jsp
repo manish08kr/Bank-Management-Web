@@ -15,14 +15,14 @@
 		<label>Enter Amount : </label>
 		<input type ="number" name = "amount" required><br><br>
 
-		<label>Enter PIN : </label><br>
+		<label>Enter PIN : </label>
 		<input type ="password" name = "pin" required><br><br>
 
     	<button type="submit">Withdraw</button>
 	</form>
 	
 	<p style="color:green">${success}</p>
-	<p style="color:green">${error}</p>
+	<p style="color:red">${error}</p>
 
 </body>
 </html>

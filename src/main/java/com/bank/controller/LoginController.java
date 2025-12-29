@@ -41,7 +41,7 @@ public class LoginController {
 			ResultSet rs = pst.executeQuery();
 
 			if (rs.next()) {
-				// store cardno in session
+				// store CARD_NO in session	--> card no yhi se hr controller me jata hai
 				session.setAttribute("cardNo", cardno);
 				return "dashboard"; 	// go to DashBoard
 			} else {

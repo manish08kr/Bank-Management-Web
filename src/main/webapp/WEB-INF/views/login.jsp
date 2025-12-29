@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Bank Login</title>
+	<title>Bank Login</title>
 </head>
 <body>
 

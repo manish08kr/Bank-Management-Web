@@ -4,12 +4,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import com.bank.database.DBConnection;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class FastCashController {
@@ -20,15 +23,23 @@ public class FastCashController {
 	}
 
 	@PostMapping("/fastCash")
-	public String fastCashWithdraw(String amount, String pin, Model model) {
+	public String fastCashWithdraw(@RequestParam int amount, @RequestParam String pin, HttpSession session, Model model) {
+		
+		String cardno = (String) session.getAttribute("cardNo");
+		if(cardno == null) {
+			model.addAttribute("error", "Session expired, Please login again!");
+			return "login";
+		}
+		
 		try {
 			Connection con = DBConnection.getConnection();
 
-			// validate PIN
-			String pinQuery = "SELECT * FROM login where pin = ?";
+			// PIN Validation
+			String pinQuery = "SELECT * FROM login WHERE cardNo = ? AND pin = ?";
 
 			PreparedStatement pst1 = con.prepareStatement(pinQuery);
-			pst1.setString(1, pin);
+			pst1.setString(1, cardno);
+			pst1.setString(2, pin);
 
 			ResultSet rs = pst1.executeQuery();
 			if (!rs.next()) {
@@ -36,49 +47,32 @@ public class FastCashController {
 				return "fastCash";
 			}
 
-			String cardno = rs.getString("cardNo");
-
-			// Calculate current balance
-			String balQuery = "SELECT type, amount FROM bank WHERE cardNo =?";
+			// Balance Check : check No Gap between SUM & (
+			String balQuery = "SELECT SUM(CASE WHEN type ='Credit' THEN amount ELSE -amount END) balance "+
+					"FROM bank WHERE cardNo =?";
+			
 			PreparedStatement pst2 = con.prepareStatement(balQuery);
 			pst2.setString(1, cardno);
 
 			ResultSet rs2 = pst2.executeQuery();
-
+			
 			int balance = 0;
-			while (rs2.next()) {
-				String type = rs2.getString("type");
-				String amtStr = rs2.getString("amount");
-
-				// --->  NULL / EMPTY CHECK (prevents NumberFormatException)
-				if (amtStr == null || amtStr.trim().isEmpty()) {
-					continue; // skip this broken row
-				}
-
-				int amt = Integer.parseInt(amtStr);
-
-				if (type.equalsIgnoreCase("Deposit")) {
-					balance += amt;
-				} else {
-					balance -= amt;
-				}
+			if (rs2.next()) {
+			    balance = rs2.getInt("balance");
 			}
 
-			int withdrawAmount = Integer.parseInt(amount);
-
-			// Check insufficient balance
-			if (balance < withdrawAmount) {
+			if (balance < amount) {
 				model.addAttribute("error", "Insufficient Balance!");
-				return "fastcash";
+				return "fastCash";
 			}
 
-			// Insert withdrawal as Fast Cash
-			String insertQuery = "INSERT INTO bank(cardNo, date, type, amount) VALUES(?, NOW(), ?, ?)";
+			// Debit entry
+			String insertQuery = "INSERT INTO bank(cardNo, type, amount) VALUES(?,?,?)";
 
 			PreparedStatement pst3 = con.prepareStatement(insertQuery);
 			pst3.setString(1, cardno);
-			pst3.setString(2, "Deposit");
-			pst3.setString(3, amount);
+			pst3.setString(2, "Debit");
+			pst3.setInt(3, amount);
 
 			pst3.executeUpdate();
 

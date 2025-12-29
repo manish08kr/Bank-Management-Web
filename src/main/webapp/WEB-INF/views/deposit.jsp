@@ -18,8 +18,6 @@
     	<button type="submit">Deposit</button>
 	</form>
 	
-	<!-- This is the older ways-->
-	<p style="color:red"><%= request.getAttribute("error")%></p>
 	
 	<!-- ${success} ==> EL (Expression Language) , For Spring mvc ==> Recommended -->
 	<p style="color:green">${success}</p> 

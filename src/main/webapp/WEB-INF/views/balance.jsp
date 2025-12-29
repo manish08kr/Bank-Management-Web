@@ -4,12 +4,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Balance Enquiry</title>
+	<title>Balance Enquiry</title>
 </head>
 <body>
 
 <h2>Balance Enquiry</h2>
-	<form action="balance" method="post">
+	<form action="/balance" method="post">
 	
 		<label>Enter PIN : </label>
 		<input type ="password" name = "pin" required><br><br>

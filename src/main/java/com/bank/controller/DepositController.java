@@ -24,7 +24,7 @@ public class DepositController {
 	@PostMapping("/deposit")
 	public String depositAmount(@RequestParam int amount, HttpSession session, Model model) {
 
-		// Get Card number from login table
+		// Get Card no from Session in loginController
 		String cardno = (String) session.getAttribute("cardNo");
 
 /***
@@ -49,7 +49,7 @@ public class DepositController {
 			Connection con = DBConnection.getConnection();
 
 			// Insert deposit transaction
-			String query = "INSERT INTO bank (cardno, type, amount) VALUES (?,?,?)";
+			String query = "INSERT INTO bank (cardNo, type, amount) VALUES (?,?,?)";
 
 			PreparedStatement pst = con.prepareStatement(query);
 			pst.setString(1, cardno);

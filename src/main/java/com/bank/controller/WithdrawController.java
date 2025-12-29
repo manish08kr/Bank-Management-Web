@@ -25,6 +25,7 @@ public class WithdrawController {
 	@PostMapping("/withdraw")
 	public String withdrawAmount(@RequestParam int amount, @RequestParam String pin, HttpSession session, Model model) {
 
+		// Get Card no from Session in loginController
 		String cardno = (String) session.getAttribute("cardNo");
 
 		if (cardno == null) {
@@ -41,7 +42,7 @@ public class WithdrawController {
 			Connection con = DBConnection.getConnection();
 
 			// Validate PIN
-			String pinCheck = "SELECT * FROM login WHERE cardNO = ? AND pin = ?";
+			String pinCheck = "SELECT * FROM login WHERE cardNo = ? AND pin = ?";
 
 			PreparedStatement pst1 = con.prepareStatement(pinCheck);
 			pst1.setString(1, cardno);
@@ -61,7 +62,7 @@ public class WithdrawController {
 			pst2.setString(1, cardno);
 
 			ResultSet rs2 = pst2.executeQuery();
-
+			rs2.next();
 			int balance = rs2.getInt("balance");
 
 			if (balance < amount) {

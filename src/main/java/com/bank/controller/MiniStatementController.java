@@ -15,36 +15,47 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.bank.database.DBConnection;
 import com.bank.model.Transaction;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class MiniStatementController {
 
-	@GetMapping("/ministatement")
+	@GetMapping("/miniStatement")
 	public String showStatementPage() {
-		return "ministatement";
+		return "miniStatement";
 	}
 
-	@PostMapping("/ministatement")
-	public String getMiniStatement(@RequestParam String pin, Model model) {
+	@PostMapping("/miniStatement")
+	public String getMiniStatement(@RequestParam String pin, HttpSession session, Model model) {
+		
+		String cardno = (String) session.getAttribute("cardNo");
+		if(cardno == null) {
+			model.addAttribute("eror",  "Session expired, Please login again!");
+			return "login";
+		}
+		
 		try {
 			Connection con = DBConnection.getConnection();
 
-			// Validate PIN 
-			String pinQuery = "SELECT cardno FROM login WHERE pin = ?";
+			// PIN Validation
+			String pinQuery = "SELECT * FROM login WHERE cardNo = ? AND pin = ?";
 
 			PreparedStatement pst1 = con.prepareStatement(pinQuery);
-			pst1.setString(1, pin);
+			pst1.setString(1, cardno);
+			pst1.setString(2, pin);
 
 			ResultSet rs = pst1.executeQuery();
 
 			if (!rs.next()) {
 				model.addAttribute("error", "Invalid PIN!");
-				return "ministatement";
+				return "miniStatement";
 			}
 
-			String cardno = rs.getString("cardNo");
-
 			// Fetch last 10 transactions
-			String txsQuery = "SELECT data, type, amount FROM bank WHERE cardNo = ? ORDER BY date DESC LIMIT 10";
+			String txsQuery = """
+					SELECT date, type, amount FROM bank
+					WHERE cardNo = ? ORDER BY date DESC LIMIT 10
+					""";
 			
 			PreparedStatement pst2 = con.prepareStatement(txsQuery);
 			pst2.setString(1, cardno);
@@ -54,11 +65,12 @@ public class MiniStatementController {
 			List<Transaction> list = new ArrayList<>();
 			
 			while(rs2.next()) {
-				list.add(new Transaction(
+				Transaction tsx = new Transaction(
 						rs2.getString("date"),
 						rs2.getString("type"),
-						rs2.getString("amount")
-				));
+						rs2.getInt("amount")
+						);
+				list.add(tsx);
 			}
 			
 			model.addAttribute("trans", list);
@@ -68,7 +80,7 @@ public class MiniStatementController {
 			model.addAttribute("error", "Database Error!");
 		}
 
-		return "ministatement";
+		return "miniStatement";
 	}
 
 }
