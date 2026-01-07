@@ -1,10 +1,15 @@
 package com.bank.model;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Transaction {
 
 	private String date;
 	private String type;
 	private int amount;
+	
+	public Transaction() {}
 		
 	public Transaction(String date, String type, int amount) {
 		this.date = date;
