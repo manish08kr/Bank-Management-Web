@@ -4,25 +4,26 @@
 <html>
 <head>
 <meta charset="UTF-8">
-	<title>Withdraw Money</title>
+	<title>Balance Enquiry</title>
 </head>
 <body>
 
-<h2>Withdraw Money</h2>
-
-	<form action="/withdraw" method="post">
+<h2>Balance Enquiry</h2>
+	<form action="/balance" method="post">
 	
-		<label>Enter Amount : </label>
-		<input type ="number" name = "amount" required><br><br>
-
 		<label>Enter PIN : </label>
 		<input type ="password" name = "pin" required><br><br>
 
-    	<button type="submit">Withdraw</button>
+    	<button type="submit">Check Balance</button>
 	</form>
 	
-	<p style="color:green">${success}</p>
+	<p style="color:green; font-size:18px;">${balanceMessage}</p>
 	<p style="color:red">${error}</p>
+	
+		
+	<br>
+	<a href="dashboard">Back to Dashboard</a>
+	
 
 </body>
 </html>

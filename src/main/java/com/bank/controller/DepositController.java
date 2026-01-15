@@ -18,6 +18,11 @@ public class DepositController {
 
 	@GetMapping("/deposit")
 	public String showDepositPage(HttpSession session) {
+		
+		String cardno = (String) session.getAttribute("cardNo");
+		if(cardno == null) {
+			return "redirect:/login";
+		}
 		return "deposit";
 	}
 
@@ -36,8 +41,8 @@ public class DepositController {
 
  */
 		if (cardno == null) {
-			model.addAttribute("error", "Session expired. Please login Again!");
-			return "login"; // go to the login.jsp
+			//	Session expired. Please login Again
+			return "redirect/login"; // go to the login.jsp
 		}
 
 		if (amount <= 0) {

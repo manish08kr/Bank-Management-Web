@@ -27,5 +27,8 @@
 	<p style="color:red">${error}</p>
 	<p style="color:green">${success}</p>
 
+	<br>
+	<a href="dashboard">Back to Dashboard</a>
+
 </body>
 </html>

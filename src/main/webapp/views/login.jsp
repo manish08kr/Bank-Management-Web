@@ -7,6 +7,8 @@
 </head>
 <body>
 
+	<!-- OLD WAY(pre-2005 era) ==> NOT MVC Friendly -->
+
 	<%
 		String success = (String) request.getAttribute("success");
 		String error = (String) request.getAttribute("error");
@@ -22,6 +24,13 @@
 	<%
 		}
 	%>
+	
+	
+	<!-- NEW WAY ==> MVC Friendly -->
+	
+	<%-- p style="color: green;">${success}</p>
+	<p style="color: red;">${error}</p>  --%>
+	
 
 	<h2>Login</h2>
 

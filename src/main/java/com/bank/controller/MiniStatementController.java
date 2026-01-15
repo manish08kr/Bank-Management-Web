@@ -21,7 +21,11 @@ import jakarta.servlet.http.HttpSession;
 public class MiniStatementController {
 
 	@GetMapping("/miniStatement")
-	public String showStatementPage() {
+	public String showStatementPage(HttpSession session) {
+		String cardNo = (String) session.getAttribute("cardNo");
+	       if (cardNo == null) {
+	           return "redirect:/login";
+	       }
 		return "miniStatement";
 	}
 
@@ -29,9 +33,9 @@ public class MiniStatementController {
 	public String getMiniStatement(@RequestParam String pin, HttpSession session, Model model) {
 		
 		String cardno = (String) session.getAttribute("cardNo");
+		
 		if(cardno == null) {
-			model.addAttribute("eror",  "Session expired, Please login again!");
-			return "login";
+			return "redirect:/login";
 		}
 		
 		try {

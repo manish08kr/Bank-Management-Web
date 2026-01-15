@@ -3,7 +3,7 @@ package com.bank.controller;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
- 
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,11 @@ import jakarta.servlet.http.HttpSession;
 public class WithdrawController {
 
 	@GetMapping("/withdraw")
-	public String showWithdrawPage() {
+	public String showWithdrawPage(HttpSession session) {
+		String cardNo = (String) session.getAttribute("cardNo");
+		if (cardNo == null) {
+			return "redirect:/login";
+		}
 		return "withdraw";
 	}
 
@@ -29,8 +33,7 @@ public class WithdrawController {
 		String cardno = (String) session.getAttribute("cardNo");
 
 		if (cardno == null) {
-			model.addAttribute("error", "Session expired. Please login Again!");
-			return "login";
+			return "redirect:/login";
 		}
 
 		if (amount <= 0) {
@@ -62,8 +65,10 @@ public class WithdrawController {
 			pst2.setString(1, cardno);
 
 			ResultSet rs2 = pst2.executeQuery();
-			rs2.next();
-			int balance = rs2.getInt("balance");
+			int balance = 0;
+			if(rs2.next()) {
+				balance = rs2.getInt("balance");
+			}
 
 			if (balance < amount) {
 				model.addAttribute("error", "Insufficient balance!");

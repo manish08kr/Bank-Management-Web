@@ -18,7 +18,12 @@ import jakarta.servlet.http.HttpSession;
 public class BalanceController {
 
 	@GetMapping("/balance")
-	public String showBalancePage() {
+	public String showBalancePage(HttpSession session) {
+		
+		String cardNo = (String) session.getAttribute("cardNo");
+	       if (cardNo == null) {
+	           return "redirect:/login";
+	       }
 		return "balance";
 	}
 
@@ -29,7 +34,7 @@ public class BalanceController {
 		
 		if(cardno == null) {
 			model.addAttribute("error", "Session expired. Please Login again!");
-			return "login";
+			return "redirect:/login";
 		}
 		
 		try {

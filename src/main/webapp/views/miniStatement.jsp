@@ -52,5 +52,8 @@
 		}
 	%>
 
+<br>
+<a href="dashboard">Back to Dashboard</a>
+
 </body>
 </html>
