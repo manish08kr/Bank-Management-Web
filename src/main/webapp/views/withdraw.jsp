@@ -12,10 +12,11 @@
 
 	<form action="/withdraw" method="post">
 
-		<label>Enter Amount : </label> <input type="number" name="amount"
-			required><br>
-		<br> <label>Enter PIN : </label> <input type="password"
-			name="pin" required><br>
+		<label>Enter Amount : </label>
+		<input type="number" name="amount" required><br>
+		
+		<br> <label>Enter PIN : </label> 
+		<input type="password" name="pin" required><br>
 		<br>
 
 		<button type="submit">Withdraw</button>
@@ -26,7 +27,6 @@
 
 	<br>
 	<a href="dashboard">Back to Dashboard</a>
-
 
 </body>
 </html>

@@ -86,5 +86,4 @@ public class PinController {
 
 		return "pinChange";
 	}
-
 }
